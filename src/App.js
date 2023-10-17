@@ -1,25 +1,28 @@
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
+import Measure from './Measure';
+import { useSpeechRecognition } from 'react-speech-recognition';
+
+export const App = () => {
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
+  if (!browserSupportsSpeechRecognition) {
+    return <span>Browser dosen't support speach recognition.</span>;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Measure
+        transcript={transcript}
+        listening={listening}
+        resetTranscript={resetTranscript}
+      />
+    </>
   );
-}
+};
 
 export default App;
