@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SpeechRecognition from 'react-speech-recognition';
+import Indicator from './Indicator';
 
 const Measure = ({ transcript, listening, resetTranscript }) => {
   const [startTime, setStartTime] = useState(null);
@@ -22,7 +23,6 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
           setEndTime(Date.now());
           SpeechRecognition.stopListening();
           setTextFlag(!textFlag);
-          console.log(transcript);
         }
       }
     };
@@ -48,7 +48,7 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
       console.log('文字数: ', transcript.length);
       console.log('秒数: ', seconds);
       console.log('ミリ秒数: ', difference);
-      console.log("いっ")
+
     }
   }, [startTime, endTime]);
 
@@ -60,7 +60,7 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
           : 'もう一度エンターキーを押して計測終了'}
       </p>
       {wordsPerMinute !== null && <p>一分間に: {wordsPerMinute} 文字ペース</p>}
-      <p>{transcript}</p>
+      <Indicator value={wordsPerMinute} />
     </div>
   );
 };
