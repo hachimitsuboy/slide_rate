@@ -21,6 +21,7 @@ export const App = () => {
         listening={listening}
         resetTranscript={resetTranscript}
       />
+      
     </>
   );
 };
