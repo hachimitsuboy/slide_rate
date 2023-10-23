@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import SpeechRecognition from 'react-speech-recognition';
-import Indicator from './Indicator';
+import SpeechRecognition, {
+  useSpeechRecognition
+} from 'react-speech-recognition';
+import Graph from './Graph';
 
-const Measure = ({ transcript, listening, resetTranscript }) => {
+const Measure = () => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [wordsPerMinute, setWordsPerMinute] = useState(null);
   const [textFlag, setTextFlag] = useState(true);
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -48,9 +56,12 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
       console.log('文字数: ', transcript.length);
       console.log('秒数: ', seconds);
       console.log('ミリ秒数: ', difference);
-
     }
   }, [startTime, endTime]);
+
+  if (!browserSupportsSpeechRecognition) {
+    return <span>Browser dosen't support speach recognition.</span>;
+  }
 
   return (
     <div>
@@ -60,7 +71,7 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
           : 'もう一度エンターキーを押して計測終了'}
       </p>
       {wordsPerMinute !== null && <p>一分間に: {wordsPerMinute} 文字ペース</p>}
-      <Indicator value={wordsPerMinute} />
+      <Graph start={4} end={5} result={wordsPerMinute} />
     </div>
   );
 };
