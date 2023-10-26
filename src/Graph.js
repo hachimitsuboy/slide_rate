@@ -3,31 +3,41 @@ import './Graph.css';
 
 const LINE_LENGTH = 11;
 
-const Graph = ({ start, end, value }) => {
-  const percentageStart = (start / (LINE_LENGTH - 1)) * 100;
-  const percentageWidth = ((end - start + 1) / (LINE_LENGTH - 1)) * 100;
+const Graph = ({ slideTiming, slideTextLength, actualWordsPerMinute }) => {
+  const idealWordsPerMinute = (slideTextLength / slideTiming) * 60;
+  const lowerLimit = idealWordsPerMinute - 10;
+  const upperLimit = idealWordsPerMinute + 10;
 
-  // valueに基づいて丸い点の基本的な位置を計算
-  const circleMarkerBasePosition =
-    value > 250 && value < 350 ? Math.floor((value - 250) / 10) : 4;
+  const percentageStart = ((lowerLimit - 250) / (350 - 250)) * 100;
+  const percentageEnd = ((upperLimit - 250) / (350 - 250)) * 100;
 
-  // valueに基づいて領域内の位置を計算
-  const circleMarkerOffset = value > 250 && value < 350 ? value % 10 : 4;
+  let circleMarkerBasePosition;
+  let circleMarkerStyle = {};
 
-  console.log('circleMarkerBasePosition: ', circleMarkerBasePosition);
-  console.log('cicleMarkerOffset: ', circleMarkerOffset);
+  if (actualWordsPerMinute < 250) {
+    circleMarkerStyle = { left: '-20px' }; // ここを調整して250未満の時の位置を設定
+  } else if (actualWordsPerMinute > 350) {
+    circleMarkerStyle = { right: '-20px' }; // ここを調整して350以上の時の位置を設定
+  } else {
+    circleMarkerBasePosition = Math.floor((actualWordsPerMinute - 250) / 10);
+    const circleMarkerOffset = actualWordsPerMinute % 10;
+    circleMarkerStyle = {
+      left: `calc(${(circleMarkerBasePosition / (LINE_LENGTH - 1)) * 100}% + ${
+        (circleMarkerOffset / 10) * ((1 / (LINE_LENGTH - 1)) * 100)
+      }%)`
+    };
+  }
 
   return (
-    <div className="shapes-container">
-      {/* 赤色の長方形 */}
+    <div className="shapes-container" style={{ marginLeft: '100px' }}>
+      {/* 緑色の長方形 */}
       <div
         className="green-highlight"
         style={{
           left: `${percentageStart}%`,
-          width: `${percentageWidth}%`
+          width: `${percentageEnd - percentageStart}%`
         }}
       ></div>
-
       {/* 基本の直線 */}
       {Array.from({ length: LINE_LENGTH }).map((_, index) => (
         <div
@@ -38,21 +48,10 @@ const Graph = ({ start, end, value }) => {
           }}
         ></div>
       ))}
-
       {/* 丸い点 */}
-      {circleMarkerBasePosition >= 0 &&
-        circleMarkerBasePosition < LINE_LENGTH && (
-          <div
-            className="circle-marker"
-            style={{
-              left: `calc(${
-                (circleMarkerBasePosition / (LINE_LENGTH - 1)) * 100
-              }% + ${
-                (circleMarkerOffset / 10) * ((1 / (LINE_LENGTH - 1)) * 100)
-              }%)`
-            }}
-          ></div>
-        )}
+      {actualWordsPerMinute !== null && (
+        <div className="circle-marker" style={circleMarkerStyle}></div>
+      )}
     </div>
   );
 };
