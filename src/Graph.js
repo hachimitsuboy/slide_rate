@@ -1,9 +1,15 @@
 import React from 'react';
 import './Graph.css';
+import TargetArea from './TargetArea';
 
 const LINE_LENGTH = 11;
 
-const Graph = ({ slideTiming, slideTextLength, actualWordsPerMinute }) => {
+const Graph = ({
+  slideTiming,
+  slideTextLength,
+  actualWordsPerMinute,
+  areaCount
+}) => {
   const idealWordsPerMinute = (slideTextLength / slideTiming) * 60;
   const lowerLimit = idealWordsPerMinute - 10;
   const upperLimit = idealWordsPerMinute + 10;
@@ -31,13 +37,11 @@ const Graph = ({ slideTiming, slideTextLength, actualWordsPerMinute }) => {
   return (
     <div className="shapes-container" style={{ marginLeft: '100px' }}>
       {/* 緑色の長方形 */}
-      <div
-        className="green-highlight"
-        style={{
-          left: `${percentageStart}%`,
-          width: `${percentageEnd - percentageStart}%`
-        }}
-      ></div>
+      <TargetArea
+        percentageStart={percentageStart}
+        percentageEnd={percentageEnd}
+        areaCount={areaCount}
+      />
       {/* 基本の直線 */}
       {Array.from({ length: LINE_LENGTH }).map((_, index) => (
         <div
