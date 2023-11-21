@@ -1,28 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import SpeechRecognition from 'react-speech-recognition';
+import SpeechRecognition, {
+  useSpeechRecognition
+} from 'react-speech-recognition';
+import Graph from './Graph';
 
-const Measure = ({ transcript, listening, resetTranscript }) => {
+const Measure = ({ slideTextLengths }) => {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [wordsPerMinute, setWordsPerMinute] = useState(null);
   const [textFlag, setTextFlag] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [areaCount, setAreaCount] = useState(0);
+
+  const initialSlideTimings = slideTextLengths.map(
+    (length) => (length / 300) * 60
+  );
+  const [slideTimings, setSlideTimings] = useState(initialSlideTimings);
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
 
   useEffect(() => {
     const handleKeyPress = (event) => {
       if (event.key === 'Enter') {
+        setAreaCount(areaCount + 1);
         if (startTime === null) {
-          // 最初のEnterキーが押されたとき
           resetTranscript();
           setWordsPerMinute(null);
           setStartTime(Date.now());
           SpeechRecognition.startListening({ continuous: true });
           setTextFlag(!textFlag);
         } else if (endTime === null) {
-          // 2回目のEnterキーが押されたとき
           setEndTime(Date.now());
           SpeechRecognition.stopListening();
           setTextFlag(!textFlag);
-          console.log(transcript);
         }
       }
     };
@@ -30,7 +45,6 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
     document.addEventListener('keypress', handleKeyPress);
 
     return () => {
-      // コンポーネントがアンマウントされるときにイベントリスナーを削除
       document.removeEventListener('keypress', handleKeyPress);
     };
   }, [startTime, endTime]);
@@ -39,18 +53,33 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
     if (startTime !== null && endTime !== null) {
       const difference = endTime - startTime;
       const seconds = Math.floor(difference / 1000);
-      const lengthPerSecond = transcript.length / seconds;
-      const lenghtPerMinute = lengthPerSecond * 60;
-      setWordsPerMinute(lenghtPerMinute);
-      setStartTime(null); // 計測終了後、再度計測できるように初期化
-      setEndTime(null);
+      console.log('経過時間： ', seconds);
+      const actualWordsPerMinute = (transcript.length / seconds) * 60;
+      setWordsPerMinute(actualWordsPerMinute);
+      const overtime = seconds - slideTimings[currentSlide];
 
-      console.log('文字数: ', transcript.length);
-      console.log('秒数: ', seconds);
-      console.log('ミリ秒数: ', difference);
-      console.log("いっ")
+      const remainingSlides = slideTextLengths.length - (currentSlide + 1);
+      if (remainingSlides > 0) {
+        const distributedOvertime = overtime / remainingSlides;
+
+        const updatedTimings = slideTimings.map((timing, index) => {
+          if (index <= currentSlide) {
+            return timing;
+          }
+          return timing - distributedOvertime;
+        });
+        setSlideTimings(updatedTimings);
+      }
+
+      setStartTime(null);
+      setEndTime(null);
+      setCurrentSlide(currentSlide + 1);
     }
   }, [startTime, endTime]);
+
+  if (!browserSupportsSpeechRecognition) {
+    return <span>Browser doesn't support speech recognition.</span>;
+  }
 
   return (
     <div>
@@ -61,6 +90,12 @@ const Measure = ({ transcript, listening, resetTranscript }) => {
       </p>
       {wordsPerMinute !== null && <p>一分間に: {wordsPerMinute} 文字ペース</p>}
       <p>{transcript}</p>
+      <Graph
+        slideTiming={slideTimings[currentSlide]}
+        slideTextLength={slideTextLengths[currentSlide]}
+        actualWordsPerMinute={wordsPerMinute}
+        areaCount={areaCount}
+      />
     </div>
   );
 };
