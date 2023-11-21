@@ -12,18 +12,20 @@ const Graph = ({
 }) => {
   const idealWordsPerMinute = (slideTextLength / slideTiming) * 60;
   const lowerLimit = idealWordsPerMinute - 10;
-  const upperLimit = idealWordsPerMinute + 10;
+  // Ensure the upperLimit is at least 310 for drawing purposes
+  const upperLimit = Math.max(idealWordsPerMinute + 10, 310);
 
   const percentageStart = ((lowerLimit - 250) / (350 - 250)) * 100;
+  // Use the adjusted upperLimit for percentageEnd calculation
   const percentageEnd = ((upperLimit - 250) / (350 - 250)) * 100;
 
   let circleMarkerBasePosition;
   let circleMarkerStyle = {};
 
   if (actualWordsPerMinute < 250) {
-    circleMarkerStyle = { left: '-20px' }; // ここを調整して250未満の時の位置を設定
+    circleMarkerStyle = { left: '-20px' }; // Adjust this to set the position for when it's below 250
   } else if (actualWordsPerMinute > 350) {
-    circleMarkerStyle = { right: '-20px' }; // ここを調整して350以上の時の位置を設定
+    circleMarkerStyle = { right: '-20px' }; // Adjust this to set the position for when it's above 350
   } else {
     circleMarkerBasePosition = Math.floor((actualWordsPerMinute - 250) / 10);
     const circleMarkerOffset = actualWordsPerMinute % 10;
@@ -34,15 +36,18 @@ const Graph = ({
     };
   }
 
+  // Marker for the 300 words per minute pace
+  const marker300wpmPosition = ((300 - 250) / (350 - 250)) * 100;
+
   return (
     <div className="shapes-container" style={{ marginLeft: '100px' }}>
-      {/* 緑色の長方形 */}
+      {/* Green rectangle */}
       <TargetArea
         percentageStart={percentageStart}
         percentageEnd={percentageEnd}
         areaCount={areaCount}
       />
-      {/* 基本の直線 */}
+      {/* Base line */}
       {Array.from({ length: LINE_LENGTH }).map((_, index) => (
         <div
           key={index}
@@ -52,10 +57,21 @@ const Graph = ({
           }}
         ></div>
       ))}
-      {/* 丸い点 */}
+      {/* Circle marker */}
       {actualWordsPerMinute !== null && (
         <div className="circle-marker" style={circleMarkerStyle}></div>
       )}
+      {/* Marker for 300 wpm */}
+      <div
+        className="marker-300wpm"
+        style={{
+          position: 'absolute',
+          height: '100%',
+          width: '2px',
+          background: 'blue',
+          left: `${marker300wpmPosition}%`
+        }}
+      ></div>
     </div>
   );
 };
