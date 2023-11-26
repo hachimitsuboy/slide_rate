@@ -2,6 +2,7 @@
   "name": "slide_rate",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://hachimitsuboy.github.io/slide_rate/",
   "dependencies": {
     "@nivo/bar": "^0.83.0",
     "@nivo/line": "^0.83.0",
