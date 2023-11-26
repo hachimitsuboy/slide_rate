@@ -40,7 +40,7 @@ const Graph = ({
   const marker300wpmPosition = ((300 - 250) / (350 - 250)) * 100;
 
   return (
-    <div className="shapes-container" style={{ marginLeft: '100px' }}>
+    <div className="shapes-container" style={{ marginLeft: '120px' }}>
       {/* Green rectangle */}
       <TargetArea
         percentageStart={percentageStart}
